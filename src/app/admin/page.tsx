@@ -106,6 +106,23 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <main className="mx-auto max-w-6xl p-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
+            <p className="mt-1 text-sm text-muted">Overview of system activity and complaint management.</p>
+          </div>
+          <div className="text-right">
+            {auth ? (
+              <div className="text-sm text-[var(--muted)]">
+                <div className="font-medium text-white">{auth.name ?? (auth.email ?? 'Admin')}</div>
+                <div className="mt-0.5">{auth.email} • {auth.role}</div>
+                <div className="mt-3">
+                  <button onClick={() => { try { localStorage.removeItem('auth'); } catch {} ; window.location.href = '/'; }} className="rounded-md btn-secondary px-3 py-1 text-sm">Logout</button>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
         <div className="mb-6 rounded-2xl card-surface p-6">
           <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
           <p className="mt-1 text-sm text-muted">Overview of system activity and complaint management.</p>

@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
   const router = useRouter();
-  const [auth, setAuth] = useState<{ email?: string; role?: string } | null>(null);
+  const [auth, setAuth] = useState<{ email?: string; role?: string; name?: string } | null>(null);
+  const [feedbackCount, setFeedbackCount] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -17,6 +18,14 @@ export default function Navbar() {
     } catch {
       setAuth(null);
     }
+    // fetch feedback count for a visible indicator
+    (async () => {
+      try {
+        const res = await fetch('/api/feedback');
+        const j = await res.json();
+        if (res.ok && Array.isArray(j.feedback)) setFeedbackCount(j.feedback.length);
+      } catch {}
+    })();
   }, []);
 
   function logout() {
@@ -45,8 +54,11 @@ export default function Navbar() {
           <Link href="/" className="text-sm text-gray-400 hover:text-white transition">
             Home
           </Link>
-          <Link href="/feedback" className="hidden sm:inline text-sm text-muted-2 hover:text-white transition">
-            Feedback
+          <Link href="/feedback" className="hidden sm:inline text-sm text-muted-2 hover:text-white transition flex items-center gap-2">
+            <span>Feedback</span>
+            {typeof feedbackCount === 'number' ? (
+              <span className="inline-flex items-center justify-center rounded-full bg-white/10 px-2 py-0.5 text-xs font-semibold">{feedbackCount}</span>
+            ) : null}
           </Link>
 
           <Link href={auth.role === "admin" ? "/admin" : "/dashboard"} className="text-sm text-white">

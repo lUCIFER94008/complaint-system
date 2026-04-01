@@ -14,8 +14,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // For demo purposes we return role and email — do NOT ship like this in production.
-    return NextResponse.json({ email: user.email, role: user.role });
+    // For demo purposes we return role, email and name — do NOT ship like this in production.
+    return NextResponse.json({ email: user.email, role: user.role, name: user.name });
   } catch (err) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }

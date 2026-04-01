@@ -24,7 +24,7 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Login failed");
       try {
-        localStorage.setItem("auth", JSON.stringify({ email: data.email, role: data.role }));
+        localStorage.setItem("auth", JSON.stringify({ email: data.email, role: data.role, name: data.name }));
       } catch {}
       router.push(data.role === "admin" ? "/admin" : "/dashboard");
     } catch (err) {
