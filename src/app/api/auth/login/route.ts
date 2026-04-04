@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { users } from '@/lib/mockdb';
+import { getCollection } from '@/lib/db-utils';
 
 export async function POST(req: Request) {
   try {
@@ -9,12 +9,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
     }
 
-    const user = users.find((u) => u.email === String(email));
+    const { collection, mock } = await getCollection<any>('users');
+
+    let user: any = null;
+    if (collection) {
+      user = await collection.findOne({ email: String(email) });
+    } else if (mock) {
+      user = mock.find((u) => u.email === String(email));
+    }
+
     if (!user || user.password !== String(password)) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // For demo purposes we return role, email and name — do NOT ship like this in production.
+    // For demo purposes we return role, email and name
     return NextResponse.json({ email: user.email, role: user.role, name: user.name });
   } catch (err) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });

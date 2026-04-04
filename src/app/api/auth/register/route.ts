@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { users } from '@/lib/mockdb';
+import { getCollection } from '@/lib/db-utils';
 
 // Allow configuring admin creation code via environment variable
 const ADMIN_CREATE_CODE = process.env.ADMIN_CREATE_CODE || 'ADMIN_SECRET';
@@ -13,17 +13,32 @@ export async function POST(req: Request) {
     }
 
     if (role === 'admin' && adminCode !== ADMIN_CREATE_CODE) {
-      return NextResponse.json({ error: 'Invalid admin code. Please set the correct code in ADMIN_CREATE_CODE environment variable.' }, { status: 403 });
+      return NextResponse.json({ error: 'Invalid admin code.' }, { status: 403 });
     }
 
-    const exists = users.find((u) => u.email === String(email));
-    if (exists) {
-      return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
+    const { collection, mock } = await getCollection<any>('users');
+
+    if (collection) {
+      const exists = await collection.findOne({ email: String(email) });
+      if (exists) return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
+      await collection.insertOne({
+        name: String(name || ''),
+        email: String(email),
+        password: String(password),
+        role: role === 'admin' ? 'admin' : 'user',
+        createdAt: new Date()
+      });
+      return NextResponse.json({ ok: true });
     }
 
-    users.push({ name: String(name || ''), email: String(email), password: String(password), role: role === 'admin' ? 'admin' : 'user' });
+    if (mock) {
+      const exists = mock.find((u) => u.email === String(email));
+      if (exists) return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
+      mock.push({ name: String(name || ''), email: String(email), password: String(password), role: role === 'admin' ? 'admin' : 'user' });
+      return NextResponse.json({ ok: true });
+    }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ error: 'Database unavailable' }, { status: 500 });
   } catch (err) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }
