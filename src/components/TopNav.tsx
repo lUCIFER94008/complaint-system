@@ -15,7 +15,7 @@ export default function TopNav({ title }: TopNavProps) {
   // Read auth synchronously (TopNav is a client component) to avoid a
   // Defer reading `localStorage` until after mount so server and client
   // markup remain consistent and avoid hydration mismatches.
-  const [auth, setAuth] = useState<{ email?: string; role?: string } | null>(null);
+  const [auth, setAuth] = useState<{ email?: string; role?: string; name?: string } | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -39,10 +39,10 @@ export default function TopNav({ title }: TopNavProps) {
   // Avoid rendering until after mount to keep server/client HTML identical.
   if (!mounted) return null;
 
-  // If user is signed in, the app shows a `Navbar` inside pages (dashboard,
-  // submit, etc.). Hide the global TopNav when authenticated to avoid
-  // duplicate navbars. Also hide on admin pages (admin has its own layout).
-  if (auth || (pathname && pathname.startsWith("/admin"))) return null;
+  // We hide the TopNav on internal pages (dashboard, submit, etc.) because they
+  // use the separate internal Navbar. We also hide it on Admin pages.
+  const hiddenPaths = ["/dashboard", "/admin", "/complaints/submit"];
+  if (pathname && hiddenPaths.some((p) => pathname.startsWith(p))) return null;
 
   return (
     <header className="sticky top-0 z-20 bg-black/80 backdrop-blur-md border-b border-white/10">

@@ -13,7 +13,7 @@ type Complaint = {
 };
 
 export default function AdminPage() {
-  const [auth, setAuth] = useState<{ email?: string; role?: string } | null>(null);
+  const [auth, setAuth] = useState<{ name?: string; email?: string; role?: string } | null>(null);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [stats, setStats] = useState<{ users?: number; complaints?: number; feedback?: number; complaintsBreakdown?: any } | null>(null);
   const [users, setUsers] = useState<Array<{ name?: string; email: string; role: string }>>([]);

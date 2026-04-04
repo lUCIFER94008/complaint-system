@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { complaints } from "@/lib/mockdb";
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const body = await req.json();
     const { status } = body || {};
     const idx = complaints.findIndex((c) => String(c.id) === String(id));
@@ -16,8 +16,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  const id = params.id;
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const idx = complaints.findIndex((c) => String(c.id) === String(id));
   if (idx === -1) return NextResponse.json({ error: "Not found" }, { status: 404 });
   complaints.splice(idx, 1);
