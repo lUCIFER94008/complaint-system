@@ -83,28 +83,28 @@ export default function SubmitComplaint() {
             ) : (
               <form onSubmit={onSubmit} className="mt-6 space-y-4">
                 <div>
-                  <label className="text-sm text-white">Full name</label>
-                  <input value={name} onChange={(e) => setName(e.target.value)} required className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-white outline-none focus:ring-2 focus:ring-[var(--accent)]" />
+                  <label htmlFor="name" className="text-sm text-white">Full name</label>
+                  <input id="name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Your full name" className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-white outline-none focus:ring-2 focus:ring-[var(--accent)]" />
                 </div>
 
                 <div>
-                  <label className="text-sm text-white">Email</label>
-                  <input value={email} onChange={(e) => setEmail(e.target.value)} required type="email" className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-white outline-none focus:ring-2 focus:ring-[var(--accent)]" />
+                  <label htmlFor="email" className="text-sm text-white">Email</label>
+                  <input id="email" value={email} onChange={(e) => setEmail(e.target.value)} required type="email" placeholder="email@example.com" className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-white outline-none focus:ring-2 focus:ring-[var(--accent)]" />
                 </div>
 
                 <div>
-                  <label className="text-sm text-white">Title</label>
-                  <input value={title} onChange={(e) => setTitle(e.target.value)} required className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-white outline-none focus:ring-2 focus:ring-[var(--accent)]" />
+                  <label htmlFor="title" className="text-sm text-white">Title</label>
+                  <input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Short title for your complaint" className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-white outline-none focus:ring-2 focus:ring-[var(--accent)]" />
                 </div>
 
                 <div>
-                  <label className="text-sm text-white">Description</label>
-                  <textarea value={description} onChange={(e) => setDescription(e.target.value)} required className="mt-2 w-full min-h-[140px] rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-white outline-none focus:ring-2 focus:ring-[var(--accent)]" />
+                  <label htmlFor="description" className="text-sm text-white">Description</label>
+                  <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} required placeholder="Provide detailed information about your issue..." className="mt-2 w-full min-h-[140px] rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-white outline-none focus:ring-2 focus:ring-[var(--accent)]" />
                 </div>
 
                 <div>
-                  <label className="text-sm text-white">Attachment (optional)</label>
-                  <input type="file" className="mt-2 w-full text-sm text-white/70" />
+                  <label htmlFor="attachment" className="text-sm text-white">Attachment (optional)</label>
+                  <input id="attachment" type="file" className="mt-2 w-full text-sm text-white/70" aria-label="Upload attachment" />
                 </div>
 
                 {message ? <div className="text-sm text-white/80">{message}</div> : null}

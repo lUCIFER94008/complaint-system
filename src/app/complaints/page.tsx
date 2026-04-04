@@ -52,29 +52,41 @@ export default function ComplaintsPage() {
           </h2>
 
           <form className="mt-5 space-y-4" onSubmit={onSubmit}>
-            <input
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-              className="block w-full rounded-2xl border border-white/10 bg-transparent px-3 py-2 text-white outline-none focus:ring-2 focus:ring-white/10"
-            />
-            <input
-              required
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Your email"
-              className="block w-full rounded-2xl border border-white/10 bg-transparent px-3 py-2 text-white outline-none focus:ring-2 focus:ring-white/10"
-            />
-            <textarea
-              required
-              rows={5}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Describe your complaint"
-              className="block w-full rounded-2xl border border-white/10 bg-transparent px-3 py-2 text-white outline-none focus:ring-2 focus:ring-white/10"
-            />
+            <div>
+              <label htmlFor="name" className="sr-only">Your name</label>
+              <input
+                id="name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                className="block w-full rounded-2xl border border-white/10 bg-transparent px-3 py-2 text-white outline-none focus:ring-2 focus:ring-white/10"
+              />
+            </div>
+            <div>
+              <label htmlFor="email" className="sr-only">Your email</label>
+              <input
+                id="email"
+                required
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Your email"
+                className="block w-full rounded-2xl border border-white/10 bg-transparent px-3 py-2 text-white outline-none focus:ring-2 focus:ring-white/10"
+              />
+            </div>
+            <div>
+              <label htmlFor="message" className="sr-only">Describe your complaint</label>
+              <textarea
+                id="message"
+                required
+                rows={5}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Describe your complaint"
+                className="block w-full rounded-2xl border border-white/10 bg-transparent px-3 py-2 text-white outline-none focus:ring-2 focus:ring-white/10"
+              />
+            </div>
 
             {success ? (
               <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">

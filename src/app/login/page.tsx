@@ -42,13 +42,13 @@ export default function LoginPage() {
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <div>
-            <label className="text-sm text-[var(--muted)]">Email</label>
-            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-[var(--text)] outline-none focus:ring-2 focus:ring-[var(--accent)]" />
+            <label htmlFor="email" className="text-sm text-[var(--muted)]">Email</label>
+            <input id="email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="email@example.com" className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-[var(--text)] outline-none focus:ring-2 focus:ring-[var(--accent)]" />
           </div>
 
           <div>
-            <label className="text-sm text-[var(--muted)]">Password</label>
-            <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-[var(--text)] outline-none focus:ring-2 focus:ring-[var(--accent)]" />
+            <label htmlFor="password" className="text-sm text-[var(--muted)]">Password</label>
+            <input id="password" value={password} onChange={(e) => setPassword(e.target.value)} type="password" required placeholder="••••••••" className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-[var(--text)] outline-none focus:ring-2 focus:ring-[var(--accent)]" />
           </div>
 
           {error ? <div className="text-sm text-red-400">{error}</div> : null}
