@@ -1,27 +1,22 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
+export const transporter = nodemailer.createTransport({
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
 
-export const sendEmail = async (to: string, subject: string, text: string) => {
-  try {
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to,
-      subject,
-      text,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', info.messageId);
-    return info;
-  } catch (error) {
-    console.error('Error sending email:', error);
-    throw error;
-  }
-};
+export async function sendEmail(
+  to: string,
+  subject: string,
+  text: string
+) {
+  await transporter.sendMail({
+    from: `"Complaint System" <${process.env.EMAIL_USER}>`,
+    to,
+    subject,
+    text,
+  });
+}
