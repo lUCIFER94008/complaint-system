@@ -14,6 +14,8 @@ if (!cached) {
 async function dbConnect() {
   const MONGODB_URI = process.env.MONGODB_URI;
 
+  console.log('--- DEBUG: MONGODB_URI loaded as:', MONGODB_URI ? '[REDACTED]' : 'UNDEFINED');
+
   if (!MONGODB_URI) {
     throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
   }
