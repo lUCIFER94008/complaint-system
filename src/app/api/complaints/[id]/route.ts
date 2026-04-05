@@ -1,25 +1,33 @@
 import { NextResponse } from "next/server";
-import { complaints } from "@/lib/mockdb";
+import dbConnect from "@/lib/mongodb";
+import { Complaint } from "@/models/Complaint";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const body = await req.json();
-    const { status } = body || {};
-    const idx = complaints.findIndex((c) => String(c.id) === String(id));
-    if (idx === -1) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const { status } = await req.json();
     if (!status) return NextResponse.json({ error: "Status required" }, { status: 400 });
-    complaints[idx].status = status;
-    return NextResponse.json({ ok: true, complaint: complaints[idx] });
+
+    await dbConnect();
+    const updated = await Complaint.findByIdAndUpdate(id, { status }, { new: true });
+    
+    if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ ok: true, complaint: updated });
   } catch (err) {
+    console.error('Complaint PATCH error:', err);
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 }
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const idx = complaints.findIndex((c) => String(c.id) === String(id));
-  if (idx === -1) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  complaints.splice(idx, 1);
-  return NextResponse.json({ ok: true });
+  try {
+    const { id } = await params;
+    await dbConnect();
+    const result = await Complaint.findByIdAndDelete(id);
+    if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error('Complaint DELETE error:', err);
+    return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
+  }
 }

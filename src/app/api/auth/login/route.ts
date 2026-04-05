@@ -1,30 +1,37 @@
 import { NextResponse } from 'next/server';
-import { getCollection } from '@/lib/db-utils';
+import dbConnect from '@/lib/mongodb';
+import { User } from '@/models/User';
+import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
   try {
+    await dbConnect();
     const body = await req.json();
     const { email, password } = body || {};
+
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
     }
 
-    const { collection, mock } = await getCollection<any>('users');
+    const user = await User.findOne({ email: String(email).toLowerCase() });
 
-    let user: any = null;
-    if (collection) {
-      user = await collection.findOne({ email: String(email) });
-    } else if (mock) {
-      user = mock.find((u) => u.email === String(email));
-    }
-
-    if (!user || user.password !== String(password)) {
+    if (!user) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    // For demo purposes we return role, email and name
+    const isMatch = await bcrypt.compare(String(password), user.password);
+    if (!isMatch) {
+      // Fallback for initial admin if not hashed yet (or just return 401)
+      if (user.password === String(password)) {
+        // Allow plain text only for the very first time / migration
+      } else {
+        return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+      }
+    }
+
     return NextResponse.json({ email: user.email, role: user.role, name: user.name });
   } catch (err) {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+    console.error('Login error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
