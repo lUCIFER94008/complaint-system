@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Navbar from "@/components/Navbar";
 import ComplaintCard from "@/components/ComplaintCard";
 
 type Complaint = {
@@ -65,7 +64,6 @@ export default function AdminPage() {
         const data = await res.json();
         setComplaints(data.complaints || []);
 
-        // load users for admin controls
         const ures = await fetch('/api/admin/users');
         const udata = await ures.json();
         setUsers(udata.users || []);
@@ -77,92 +75,70 @@ export default function AdminPage() {
     if (auth?.role === "admin") load();
   }, [auth]);
 
-  if (!auth) {
+  if (!auth || auth.role !== "admin") {
     return (
-      <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
-        <main className="mx-auto max-w-4xl p-8">
-          <div className="card-surface p-8"> 
-            <h2 className="text-lg font-semibold">Please sign in</h2>
-            <p className="mt-2 text-sm text-muted">Sign in with an admin account to access this page.</p>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  if (auth.role !== "admin") {
-    return (
-      <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
-        <main className="mx-auto max-w-4xl p-8">
-          <div className="card-surface p-8"> 
-            <h2 className="text-lg font-semibold">Access denied</h2>
-            <p className="mt-2 text-sm text-muted">You are signed in but not an admin.</p>
-          </div>
-        </main>
+      <div className="bg-[#111111] border border-white/10 rounded-2xl p-8"> 
+        <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">Access Denied</h2>
+        <p className="mt-2 text-gray-400">Please sign in with an admin account.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
-      <main className="mx-auto max-w-6xl p-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
-            <p className="mt-1 text-sm text-muted">Overview of system activity and complaint management.</p>
-          </div>
-          <div className="text-right">
-            {auth ? (
-              <div className="text-sm text-[var(--muted)]">
-                <div className="font-medium text-white">{auth.name ?? (auth.email ?? 'Admin')}</div>
-                <div className="mt-0.5">{auth.email} • {auth.role}</div>
-                <div className="mt-3">
-                  <button onClick={() => { try { localStorage.removeItem('auth'); } catch {} ; window.location.href = '/'; }} className="rounded-md btn-secondary px-3 py-1 text-sm">Logout</button>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </div>
-        <div className="mb-6 rounded-2xl card-surface p-6">
-          <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
-          <p className="mt-1 text-sm text-muted">Overview of system activity and complaint management.</p>
-        </div>
+    <>
+      <div className="mb-8 p-6 md:p-8 bg-[#111111] border border-white/10 rounded-2xl">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight">Admin Overview</h1>
+        <p className="mt-2 text-gray-400 text-sm md:text-base">System activity and complaint management dashboard.</p>
+      </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
-          <div className="rounded-2xl card-surface p-4">
-            <h3 className="text-sm text-muted">Users</h3>
-            <p className="text-2xl font-semibold">{stats?.users ?? "..."}</p>
-          </div>
-          <div className="rounded-2xl card-surface p-4">
-            <h3 className="text-sm text-muted">Complaints</h3>
-            <p className="text-2xl font-semibold">{stats?.complaints ?? "..."}</p>
-            <div className="mt-2 text-sm text-muted">
-              <span className="mr-4">Pending: {stats?.complaintsBreakdown?.pending ?? 0}</span>
-              <span className="mr-4">In Progress: {stats?.complaintsBreakdown?.inprogress ?? 0}</span>
-              <span>Resolved: {stats?.complaintsBreakdown?.resolved ?? 0}</span>
-            </div>
-          </div>
-          <div className="rounded-2xl card-surface p-4">
-            <h3 className="text-sm text-muted">Feedback</h3>
-            <p className="text-2xl font-semibold">{stats?.feedback ?? "..."}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="bg-[#111111] border border-white/10 rounded-2xl p-6 hover:scale-[1.02] transition-all duration-300">
+          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Total Users</h3>
+          <p className="text-3xl font-black text-white">{stats?.users ?? "0"}</p>
+        </div>
+        <div className="bg-[#111111] border border-white/10 rounded-2xl p-6 hover:scale-[1.02] transition-all duration-300">
+          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Complaints</h3>
+          <p className="text-3xl font-black text-white">{stats?.complaints ?? "0"}</p>
+          <div className="mt-4 flex gap-3 text-[10px] font-bold uppercase tracking-tighter">
+            <span className="text-lime-400 px-2 py-1 bg-lime-400/10 rounded-lg">Pending: {stats?.complaintsBreakdown?.pending ?? 0}</span>
+            <span className="text-gray-400 px-2 py-1 bg-white/5 rounded-lg">Resolved: {stats?.complaintsBreakdown?.resolved ?? 0}</span>
           </div>
         </div>
+        <div className="bg-[#111111] border border-white/10 rounded-2xl p-6 hover:scale-[1.02] transition-all duration-300">
+          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Feedback</h3>
+          <p className="text-3xl font-black text-white">{stats?.feedback ?? "0"}</p>
+        </div>
+      </div>
 
-        <section className="mt-8">
-          <h2 className="text-lg font-semibold mb-4">Users</h2>
-          <div className="grid gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <section>
+          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+             <div className="w-2 h-6 bg-lime-400 rounded-full" />
+             User Management
+          </h2>
+          <div className="space-y-4">
             {users.length === 0 ? (
-              <div className="rounded-2xl card-surface p-4 text-muted">No users found</div>
+              <div className="p-8 text-center bg-[#111111] border border-white/10 rounded-2xl text-gray-500">No users found</div>
             ) : (
               users.map((u) => (
-                <div key={u.email} className="flex items-center justify-between rounded-2xl card-surface p-4">
+                <div key={u.email} className="bg-[#111111] border border-white/10 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <div className="font-semibold">{u.name || '(no name)'}</div>
-                    <div className="text-sm text-[var(--muted)]">{u.email} • {u.role}</div>
+                    <div className="font-bold text-white">{u.name || '(no name)'}</div>
+                    <div className="text-sm text-gray-500">{u.email} <span className="mx-1">•</span> <span className="text-lime-400 text-xs font-black uppercase">{u.role}</span></div>
                   </div>
-                  <div className="flex gap-2">
-                    <button onClick={async () => { await toggleRole(u.email); }} className="rounded-md btn-secondary px-3 py-1 text-sm">Toggle Role</button>
-                    <button onClick={async () => { if (confirm('Delete user ' + u.email + '?')) await deleteUser(u.email); }} className="rounded-md bg-red-500/10 px-3 py-1 text-sm text-red-400">Delete</button>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => toggleRole(u.email)} 
+                      className="bg-white/5 text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-white/10 transition-all"
+                    >
+                      Toggle Role
+                    </button>
+                    <button 
+                      onClick={() => { if (confirm('Delete user ' + u.email + '?')) deleteUser(u.email); }} 
+                      className="bg-red-500/10 text-red-400 text-xs font-bold px-4 py-2 rounded-full hover:bg-red-500/20 transition-all"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               ))
@@ -170,9 +146,12 @@ export default function AdminPage() {
           </div>
         </section>
 
-        <section className="mt-8">
-          <h2 className="text-lg font-semibold mb-4">Recent Complaints</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
+        <section>
+          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+             <div className="w-2 h-6 bg-lime-400 rounded-full" />
+             Recent Complaints
+          </h2>
+          <div className="grid grid-cols-1 gap-6">
             {complaints.map((c) => (
               <ComplaintCard
                 key={c.id}
@@ -184,21 +163,19 @@ export default function AdminPage() {
                 onResolve={async () => {
                   try {
                     const res = await fetch('/api/complaints', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: c.id, status: 'resolved' }) });
-                    const j = await res.json();
-                    if (!res.ok) throw new Error(j?.error || 'Failed');
-                    // update local list
+                    if (!res.ok) throw new Error('Failed');
                     setComplaints((cur) => cur.map((x) => x.id === c.id ? { ...x, status: 'resolved' } : x));
                     const s = await fetch('/api/admin/stats'); const sd = await s.json(); setStats(sd.stats || null);
                   } catch (err) {
-                    alert(err instanceof Error ? err.message : String(err));
+                    alert('Error updating status');
                   }
                 }}
               />
             ))}
           </div>
         </section>
-      </main>
-    </div>
+      </div>
+    </>
   );
 }
 

@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/Sidebar";
 import ComplaintCard from "@/components/ComplaintCard";
 
 type Complaint = {
@@ -41,42 +39,38 @@ export default function DashboardPage() {
 
   if (!auth) {
     return (
-      <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
-        <Navbar />
-        <main className="mx-auto max-w-4xl p-8">
-          <div className="card-surface p-8"> 
-            <h2 className="text-lg font-semibold">Please sign in</h2>
-            <p className="mt-2 text-sm text-muted">Sign in to see your complaints and submit new ones.</p>
-          </div>
-        </main>
+      <div className="bg-[#111111] border border-white/10 rounded-2xl p-8"> 
+        <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">Please sign in</h2>
+        <p className="mt-2 text-gray-400">Sign in to see your complaints and submit new ones.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
-      <Navbar />
-      <div className="mx-auto flex max-w-6xl gap-6 px-4 py-8">
-        <Sidebar />
-
-        <main className="flex-1">
-          <div className="mb-6 rounded-2xl card-surface p-6">
-            <h1 className="text-2xl font-semibold">Your Complaints</h1>
-            <p className="mt-1 text-sm text-muted">A quick overview of your recent submissions.</p>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {complaints.length === 0 ? (
-              <div className="rounded-2xl card-surface p-6 text-muted">No complaints yet — submit one from the sidebar.</div>
-            ) : (
-              complaints.map((c) => (
-                <ComplaintCard key={c.id} title={c.title} description={c.description} status={c.status} date={new Date(c.createdAt).toLocaleString()} />
-              ))
-            )}
-          </div>
-        </main>
+    <>
+      <div className="mb-8 p-6 md:p-8 bg-[#111111] border border-white/10 rounded-2xl">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight">Your Complaints</h1>
+        <p className="mt-2 text-gray-400 text-sm md:text-base">A quick overview of your recent submissions and their status.</p>
       </div>
-    </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {complaints.length === 0 ? (
+          <div className="col-span-full py-12 text-center bg-[#111111] border border-dashed border-white/10 rounded-2xl text-gray-500">
+            No complaints yet — submit one from the sidebar.
+          </div>
+        ) : (
+          complaints.map((c) => (
+            <ComplaintCard 
+              key={c.id} 
+              title={c.title} 
+              description={c.description} 
+              status={c.status} 
+              date={new Date(c.createdAt).toLocaleString()} 
+            />
+          ))
+        )}
+      </div>
+    </>
   );
 }
 
