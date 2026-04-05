@@ -80,23 +80,23 @@ export default function SubmitComplaint() {
             <form onSubmit={onSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 block">Full Name</label>
-                    <input value={name} onChange={(e) => setName(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
+                    <label htmlFor="fullName" className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 block">Full Name</label>
+                    <input id="fullName" value={name} onChange={(e) => setName(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
                  </div>
                  <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 block">Email Address</label>
-                    <input value={email} onChange={(e) => setEmail(e.target.value)} required type="email" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
+                    <label htmlFor="emailAddr" className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 block">Email Address</label>
+                    <input id="emailAddr" value={email} onChange={(e) => setEmail(e.target.value)} required type="email" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
                  </div>
               </div>
 
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 block">Complaint Title</label>
-                <input value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="e.g. System Performance Issue" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
+                <label htmlFor="complaintTitle" className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 block">Complaint Title</label>
+                <input id="complaintTitle" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="e.g. System Performance Issue" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
               </div>
 
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 block">Detailed Description</label>
-                <textarea value={description} onChange={(e) => setDescription(e.target.value)} required placeholder="Please describe the issue in detail..." className="w-full min-h-[160px] bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none resize-none" />
+                <label htmlFor="complaintDesc" className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 block">Detailed Description</label>
+                <textarea id="complaintDesc" value={description} onChange={(e) => setDescription(e.target.value)} required placeholder="Please describe the issue in detail..." className="w-full min-h-[160px] bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none resize-none" />
               </div>
 
               {message && (

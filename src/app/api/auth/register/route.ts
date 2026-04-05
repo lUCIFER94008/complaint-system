@@ -38,6 +38,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('Registration error:', err);
-    return NextResponse.json({ error: 'Failed to register' }, { status: 500 });
+    // Provide a more helpful error message for debugging
+    const errorMessage = err instanceof Error ? err.message : 'Unknown server error';
+    return NextResponse.json({ 
+      error: `Failed to register: ${errorMessage}`,
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined 
+    }, { status: 500 });
   }
 }
