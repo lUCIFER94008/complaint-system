@@ -26,21 +26,21 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Mobile Overlay */}
+      {/* Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
           onClick={onClose}
         />
       )}
 
       <aside className={`
         fixed top-0 left-0 bottom-0 z-50 w-64 bg-[#111111] border-r border-white/10 p-6 
-        transition-transform duration-300 ease-in-out md:translate-x-0 md:pt-24
-        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex flex-col h-full">
-          <div className="md:hidden mb-8">
+          <div className="mb-8">
              <Link href="/" className="text-xl font-bold text-white flex items-center gap-2">
               <div className="w-8 h-8 bg-lime-400 rounded-lg flex items-center justify-center">
                 <div className="w-4 h-4 bg-black rounded-sm rotate-45" />

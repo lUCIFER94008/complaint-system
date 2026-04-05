@@ -31,7 +31,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           auth={auth}
         />
         
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-8 transition-all duration-300 md:pl-72">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-8 transition-all duration-300">
           {children}
         </main>
       </div>
