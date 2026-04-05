@@ -52,7 +52,7 @@ export default function Sidebar({
           <nav className="flex flex-col gap-2">
             {menuItems.map((item) => (
               <Link 
-                key={item.href} 
+                key={item.label} 
                 href={item.href}
                 onClick={onClose}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
