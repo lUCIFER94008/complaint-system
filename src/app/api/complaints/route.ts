@@ -211,11 +211,10 @@ export async function PATCH(req: Request) {
         try {
           await sendSMS(
             phoneTo,
-            `Your complaint "${updated.title || 'Untitled'}" has been resolved successfully. ✅`
+            `Your complaint "${updated.title || 'Untitled'}" has been resolved ✅`
           );
         } catch (smsErr) {
           console.error("SMS notification failed in PATCH:", smsErr);
-          // We do not fail the request if SMS fails
         }
       }
     }

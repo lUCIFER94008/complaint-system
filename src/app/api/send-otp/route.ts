@@ -24,26 +24,22 @@ export async function POST(req: Request) {
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
     // Save or update OTP for this email
-    await OTP.findOneAndUpdate(
-      { email: email.toLowerCase().trim() },
-      { otp: otpCode, expiresAt },
-      { upsert: true, new: true }
-    );
+    await OTP.create({
+      email: email.toLowerCase().trim(),
+      otp: otpCode,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 min
+    });
 
     // Send Email
     try {
-      await sendEmail(
-        email,
-        "Your Verification Code",
-        `Your verification code is: ${otpCode}. It is valid for 5 minutes.`
-      );
+      await sendEmail(email, "Your OTP Code", `Your OTP is ${otpCode}`);
       console.log(`OTP [${otpCode}] sent to email [${email}]`);
     } catch (mailErr) {
       console.error("Email send error:", mailErr);
-      return NextResponse.json({ error: "Failed to send OTP email. Please try again later." }, { status: 500 });
+      return NextResponse.json({ error: "Failed to send OTP email" }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true, message: "OTP sent successfully to your email." });
+    return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("Send-OTP error:", err);
     return NextResponse.json({ error: "Internal server error." }, { status: 500 });
