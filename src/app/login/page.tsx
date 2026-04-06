@@ -19,13 +19,16 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.toLowerCase(), password }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Login failed");
+      
+      // ✅ Store FULL data including 'id' and 'phone'
       try {
-        localStorage.setItem("auth", JSON.stringify({ email: data.email, role: data.role, name: data.name }));
+        localStorage.setItem("auth", JSON.stringify(data));
       } catch {}
+      
       router.push(data.role === "admin" ? "/admin" : "/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -35,33 +38,65 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]">
-      <main className="w-full max-w-md card-surface p-8 shadow-lg">
-        <h1 className="text-2xl font-semibold text-white">Welcome back</h1>
-        <p className="mt-1 text-sm text-muted">Sign in to access your dashboard</p>
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-4">
+      <main className="w-full max-w-md bg-[#111111] border border-white/10 rounded-[2rem] p-8 md:p-10 shadow-2xl relative overflow-hidden group">
+        {/* Glow effect */}
+        <div className="absolute -top-24 -left-24 w-48 h-48 bg-lime-400/10 blur-[100px] rounded-full group-hover:bg-lime-400/20 transition-all duration-700" />
+        
+        <div className="relative z-10">
+          <header className="mb-8">
+            <h1 className="text-3xl font-black text-white tracking-tight">Welcome back</h1>
+            <p className="text-gray-500 mt-2 text-sm font-medium tracking-tight">Access your complaint management portal.</p>
+          </header>
 
-        <form onSubmit={onSubmit} className="mt-6 space-y-4">
-          <div>
-            <label htmlFor="email" className="text-sm text-[var(--muted)]">Email</label>
-            <input id="email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="email@example.com" className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-[var(--text)] outline-none focus:ring-2 focus:ring-[var(--accent)]" />
+          <form onSubmit={onSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="email" className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-2 block ml-1">Email Address</label>
+              <input 
+                id="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                type="email" 
+                required 
+                placeholder="your@email.com" 
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" 
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-2 block ml-1">Password</label>
+              <input 
+                id="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                type="password" 
+                required 
+                placeholder="••••••••" 
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" 
+              />
+            </div>
+
+            {error && (
+              <div className="p-4 rounded-xl text-xs font-bold bg-red-500/10 text-red-500 border border-red-500/10">
+                {error}
+              </div>
+            )}
+
+            <button 
+              type="submit" 
+              disabled={loading} 
+              className="w-full bg-lime-400 text-black font-black py-4 rounded-full hover:bg-lime-300 disabled:opacity-50 transition-all active:scale-95 shadow-[0_0_20px_rgba(163,230,53,0.3)] hover:shadow-[0_0_30px_rgba(163,230,53,0.4)]"
+            >
+              {loading ? "AUTHENTICATING..." : "SIGN IN"}
+            </button>
+          </form>
+
+          <div className="mt-10 pt-6 border-t border-white/5 text-center">
+            <p className="text-gray-500 text-xs font-medium">
+              Don't have an account?{" "}
+              <Link href="/register" className="text-lime-400 hover:underline">Create account</Link>
+            </p>
           </div>
-
-          <div>
-            <label htmlFor="password" className="text-sm text-[var(--muted)]">Password</label>
-            <input id="password" value={password} onChange={(e) => setPassword(e.target.value)} type="password" required placeholder="••••••••" className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-[var(--text)] outline-none focus:ring-2 focus:ring-[var(--accent)]" />
-          </div>
-
-          {error ? <div className="text-sm text-red-400">{error}</div> : null}
-
-          <button type="submit" disabled={loading} className="w-full rounded-full btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-60">
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center text-sm text-[var(--muted)]">
-          <p>
-            New here? <Link href="/register" className="text-[var(--accent)]">Create an account</Link>
-          </p>
         </div>
       </main>
     </div>

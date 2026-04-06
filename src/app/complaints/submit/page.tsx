@@ -22,6 +22,11 @@ export default function SubmitComplaint() {
       setLoading(false);
       return;
     }
+    if (!auth.id) {
+       setMessage("Session expired or invalid. Please log out and log in again to continue.");
+       setLoading(false);
+       return;
+    }
     try {
       const res = await fetch("/api/complaints", {
         method: "POST",
