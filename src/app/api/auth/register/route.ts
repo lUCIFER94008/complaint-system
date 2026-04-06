@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import { User } from '@/models/User';
-import { OTP } from '@/models/OTP';
-import bcrypt from 'bcryptjs';
-import { sendSMS } from '@/lib/sms';
+import { NextResponse } from "next/server";
+import dbConnect from "@/lib/mongodb";
+import { User } from "@/models/User";
+import OTP from "@/models/OTP";
+import bcrypt from "bcryptjs";
+import { sendSMS } from "@/lib/sms";
 
 const ADMIN_CREATE_CODE = process.env.ADMIN_CREATE_CODE || 'ADMIN_SECRET';
 

@@ -14,16 +14,16 @@ export async function sendEmail(to: string, subject: string, text: string) {
   try {
     console.log("Sending email to:", to);
 
-    const res = await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: `"Complaint System" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       text,
     });
 
-    console.log("EMAIL SENT:", res);
-  } catch (err: any) {
-    console.error("EMAIL ERROR:", err.message);
-    throw err;
+    console.log("EMAIL SUCCESS:", info.messageId);
+  } catch (error: any) {
+    console.error("EMAIL ERROR:", error);
+    throw new Error("Email failed");
   }
 }

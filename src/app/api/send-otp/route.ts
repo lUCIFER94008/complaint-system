@@ -1,47 +1,58 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import { OTP } from "@/models/OTP";
+import OTP from "@/models/OTP";
 import { sendEmail } from "@/lib/mailer";
 
 export async function POST(req: Request) {
   try {
-    const { email } = await req.json();
+    // 🔍 DEBUG ENV VARIABLES
+    console.log("ENV CHECK:", {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS ? "OK" : "MISSING",
+    });
+
+    const body = await req.json();
+    const { email } = body;
 
     if (!email) {
-      return NextResponse.json({ error: "Email is required." }, { status: 400 });
-    }
-
-    if (!email.includes("@")) {
-      return NextResponse.json({ error: "Invalid email format." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Email is required" },
+        { status: 400 }
+      );
     }
 
     await dbConnect();
 
-    // Generate 6-digit OTP
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // 🔢 Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Expiration: 5 minutes from now
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    console.log("Generated OTP:", otp);
 
-    // Save or update OTP for this email
+    // 💾 Save OTP in DB
     await OTP.create({
-      email: email.toLowerCase().trim(),
-      otp: otpCode,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 min
+      email,
+      otp,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
     });
 
-    // Send Email
-    try {
-      await sendEmail(email, "Your OTP Code", `Your OTP is ${otpCode}`);
-      console.log(`OTP [${otpCode}] sent to email [${email}]`);
-    } catch (mailErr) {
-      console.error("Email send error:", mailErr);
-      return NextResponse.json({ error: "Failed to send OTP email" }, { status: 500 });
-    }
+    console.log("OTP saved to DB");
+
+    // 📧 Send Email
+    await sendEmail(
+      email,
+      "Your OTP Code",
+      `Your OTP is ${otp}`
+    );
+
+    console.log("Email sent successfully");
 
     return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error("Send-OTP error:", err);
-    return NextResponse.json({ error: "Internal server error." }, { status: 500 });
+  } catch (error: any) {
+    console.error("SEND OTP ERROR:", error);
+
+    return NextResponse.json(
+      { error: "Failed to send OTP email" },
+      { status: 500 }
+    );
   }
 }
