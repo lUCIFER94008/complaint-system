@@ -160,8 +160,8 @@ export default function RegisterPage() {
                   <input required type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Account Role</label>
-                  <select value={role} onChange={(e) => setRole(e.target.value as any)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none appearance-none">
+                  <label htmlFor="role-select" className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Account Role</label>
+                  <select id="role-select" value={role} onChange={(e) => setRole(e.target.value as any)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none appearance-none">
                     <option value="user" className="bg-[#111]">Regular User</option>
                     <option value="admin" className="bg-[#111]">Administrator</option>
                   </select>
@@ -184,11 +184,13 @@ export default function RegisterPage() {
               <div className="flex justify-between gap-2">
                 {otpValue.map((digit, idx) => (
                   <input
-                      ref={(el) => { otpInputs.current[idx] = el }}
+                    key={idx}
+                    ref={(el) => { otpInputs.current[idx] = el }}
                     type="text"
                     inputMode="numeric"
                     maxLength={1}
                     value={digit}
+                    aria-label={`OTP digit ${idx + 1}`}
                     onChange={(e) => handleOtpChange(idx, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(idx, e)}
                     className="w-12 h-14 bg-white/5 border border-white/10 rounded-xl text-center text-xl font-bold text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none"
