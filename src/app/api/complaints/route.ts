@@ -15,30 +15,32 @@ export async function POST(req: Request) {
     // 1. In-app complaint (title + description)
     // ==========================
     if (typeof body.title === "string" && typeof body.description === "string") {
-      const title = body.title.trim();
-      const description = body.description.trim();
+      const { title, description, userId, userEmail, userPhone } = body || {};
 
-      if (!title || !description) {
+      if (!title || !description || !userId) {
         return NextResponse.json(
-          { error: "Title and description required" },
+          { error: "Title, description, and userId required" },
           { status: 400 }
         );
       }
 
       const newComplaint = new Complaint({
-        title,
-        description,
-        email: body.email || null, // optional email
+        title: title.trim(),
+        description: description.trim(),
+        userId,
+        userEmail: userEmail || body.email,
+        userPhone,
         status: "pending",
       });
 
       await newComplaint.save();
 
       // ✅ SEND EMAIL (if email exists)
-      if (body.email) {
+      const targetEmail = userEmail || body.email;
+      if (targetEmail) {
         try {
           await sendEmail(
-            body.email,
+            targetEmail,
             "Complaint Submitted ✅",
             `Your complaint "${title}" has been successfully submitted.\n\nWe will review it shortly.`
           );
@@ -102,17 +104,30 @@ export async function POST(req: Request) {
 }
 
 // ==========================
-// GET – fetch complaints
+// GET – fetch complaints (Filtered by role/user)
 // ==========================
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const limitRaw = url.searchParams.get("limit") ?? "50";
+  const userId = url.searchParams.get("userId");
+  const role = url.searchParams.get("role") || "user";
   const limit = Math.max(1, Math.min(100, Number(limitRaw) || 50));
 
   try {
     await dbConnect();
 
-    const complaints = await Complaint.find({})
+    // 🎯 FILTER LOGIC
+    // If admin -> see all
+    // Else -> see only their own
+    let query = {};
+    if (role !== "admin") {
+      if (!userId) {
+        return NextResponse.json({ error: "userId required for non-admins" }, { status: 400 });
+      }
+      query = { userId };
+    }
+
+    const complaints = await Complaint.find(query)
       .sort({ createdAt: -1 })
       .limit(limit);
 
@@ -121,11 +136,15 @@ export async function GET(req: Request) {
       title: doc.title,
       description: doc.description,
       name: doc.name,
-      email: doc.email,
+      email: doc.email || doc.userEmail,
       message: doc.message,
+      phone: doc.phone || doc.userPhone,
       status: doc.status,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
+      userId: doc.userId,
+      userEmail: doc.userEmail,
+      userPhone: doc.userPhone
     }));
 
     return NextResponse.json({ ok: true, complaints: mapped });
@@ -140,8 +159,10 @@ export async function GET(req: Request) {
 }
 
 // ==========================
-// PATCH – update status + send email
+// PATCH – update status + send email & SMS
 // ==========================
+import { sendSMS } from "@/lib/sms";
+
 export async function PATCH(req: Request) {
   try {
     const { id, status } = await req.json();
@@ -169,16 +190,33 @@ export async function PATCH(req: Request) {
     }
 
     // ✅ SEND STATUS UPDATE EMAIL
-    if (updated.email) {
+    const emailTo = updated.email || updated.userEmail;
+    if (emailTo) {
       try {
         await sendEmail(
-          updated.email,
+          emailTo,
           "Complaint Status Updated 🔔",
           `Your complaint "${updated.title || "your complaint"
           }" status has been updated to "${status}".`
         );
       } catch (e) {
         console.error("Email error (PATCH):", e);
+      }
+    }
+
+    // 🔥 SEND SMS ON RESOLVED
+    if (status === "resolved") {
+      const phoneTo = updated.phone || updated.userPhone;
+      if (phoneTo) {
+        try {
+          await sendSMS(
+            phoneTo,
+            `Your complaint "${updated.title || 'Untitled'}" has been resolved successfully. ✅`
+          );
+        } catch (smsErr) {
+          console.error("SMS notification failed in PATCH:", smsErr);
+          // We do not fail the request if SMS fails
+        }
       }
     }
 
@@ -190,5 +228,31 @@ export async function PATCH(req: Request) {
       { error: "Failed to update" },
       { status: 500 }
     );
+  }
+}
+
+// ==========================
+// DELETE – remove complaint
+// ==========================
+export async function DELETE(req: Request) {
+  try {
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    }
+
+    await dbConnect();
+    const deleted = await Complaint.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ ok: true, message: "Deleted successfully" });
+  } catch (err) {
+    console.error("/api/complaints DELETE error:", err);
+    return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
   }
 }

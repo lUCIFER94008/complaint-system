@@ -11,7 +11,7 @@ export default function SubmitComplaint() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
-  const [auth, setAuth] = useState<{ email?: string; role?: string; name?: string } | null>(null);
+  const [auth, setAuth] = useState<{ id?: string; email?: string; role?: string; name?: string; phone?: string } | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,11 +26,18 @@ export default function SubmitComplaint() {
       const res = await fetch("/api/complaints", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description, name: name || auth?.name, email: email || auth?.email }),
+        body: JSON.stringify({ 
+          title, 
+          description, 
+          userId: auth?.id,
+          userEmail: auth?.email, 
+          userPhone: auth?.phone,
+          name: name || auth?.name
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Failed to create");
-      setMessage("Complaint submitted");
+      setMessage("Complaint submitted ✅");
       setTitle("");
       setDescription("");
       router.refresh();

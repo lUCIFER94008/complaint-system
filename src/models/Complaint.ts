@@ -8,6 +8,9 @@ export interface IComplaint extends Document {
   message?: string;
   status: 'pending' | 'inprogress' | 'resolved';
   phone?: string;
+  userId: string;
+  userEmail: string;
+  userPhone: string;
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -19,6 +22,9 @@ const ComplaintSchema: Schema = new Schema({
   email: { type: String, trim: true },
   message: { type: String, trim: true },
   phone: { type: String, trim: true },
+  userId: { type: String, required: true },
+  userEmail: { type: String, required: true },
+  userPhone: { type: String, required: true },
   status: { type: String, enum: ['pending', 'inprogress', 'resolved'], default: 'pending' },
 }, { timestamps: true });
 

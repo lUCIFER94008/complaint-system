@@ -9,10 +9,12 @@ type Complaint = {
   description: string;
   status: "pending" | "inprogress" | "resolved";
   createdAt: string;
+  userEmail?: string;
+  userPhone?: string;
 };
 
 export default function AdminPage() {
-  const [auth, setAuth] = useState<{ name?: string; email?: string; role?: string } | null>(null);
+  const [auth, setAuth] = useState<{ id?: string; name?: string; email?: string; role?: string } | null>(null);
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [stats, setStats] = useState<{ users?: number; complaints?: number; feedback?: number; complaintsBreakdown?: any } | null>(null);
   const [users, setUsers] = useState<Array<{ name?: string; email: string; role: string }>>([]);
@@ -23,7 +25,6 @@ export default function AdminPage() {
       const j = await res.json();
       if (!res.ok) throw new Error(j?.error || 'Failed');
       setUsers((cur) => cur.filter((u) => u.email !== email));
-      // reload stats
       const s = await fetch('/api/admin/stats'); const sd = await s.json(); setStats(sd.stats || null);
     } catch (err) {
       alert(err instanceof Error ? err.message : String(err));
@@ -45,6 +46,18 @@ export default function AdminPage() {
     }
   }
 
+  async function deleteComplaint(id: string) {
+    if (!confirm('Are you sure you want to delete this complaint?')) return;
+    try {
+      const res = await fetch(`/api/complaints?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete');
+      setComplaints((cur) => cur.filter((c) => c.id !== id));
+      const s = await fetch('/api/admin/stats'); const sd = await s.json(); setStats(sd.stats || null);
+    } catch (err) {
+      alert('Error deleting complaint');
+    }
+  }
+
   useEffect(() => {
     try {
       const item = localStorage.getItem("auth");
@@ -60,7 +73,8 @@ export default function AdminPage() {
         const s = await fetch("/api/admin/stats");
         const sd = await s.json();
         setStats(sd.stats || null);
-        const res = await fetch("/api/complaints");
+        
+        const res = await fetch(`/api/complaints?role=admin&userId=${auth?.id}`);
         const data = await res.json();
         setComplaints(data.complaints || []);
 
@@ -86,9 +100,10 @@ export default function AdminPage() {
 
   return (
     <>
-      <div className="mb-8 p-6 md:p-8 bg-[#111111] border border-white/10 rounded-2xl">
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight">Admin Overview</h1>
-        <p className="mt-2 text-gray-400 text-sm md:text-base">System activity and complaint management dashboard.</p>
+      <div className="mb-8 p-6 md:p-8 bg-[#111111] border border-white/10 rounded-2xl relative overflow-hidden group">
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-lime-400/5 blur-[80px] rounded-full group-hover:bg-lime-400/10 transition-all duration-700" />
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight relative z-10">Admin Overview</h1>
+        <p className="mt-2 text-gray-400 text-sm md:text-base relative z-10">System activity and complaint management dashboard.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
@@ -121,21 +136,21 @@ export default function AdminPage() {
               <div className="p-8 text-center bg-[#111111] border border-white/10 rounded-2xl text-gray-500">No users found</div>
             ) : (
               users.map((u) => (
-                <div key={u.email} className="bg-[#111111] border border-white/10 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div key={u.email} className="bg-[#111111] border border-white/10 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-white/20">
                   <div>
-                    <div className="font-bold text-white">{u.name || '(no name)'}</div>
-                    <div className="text-sm text-gray-500">{u.email} <span className="mx-1">•</span> <span className="text-lime-400 text-xs font-black uppercase">{u.role}</span></div>
+                    <div className="font-bold text-white tracking-tight">{u.name || '(no name)'}</div>
+                    <div className="text-xs text-gray-500 font-bold uppercase tracking-tighter">{u.email} <span className="mx-1">•</span> <span className="text-lime-400">{u.role}</span></div>
                   </div>
                   <div className="flex items-center gap-2">
                     <button 
                       onClick={() => toggleRole(u.email)} 
-                      className="bg-white/5 text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-white/10 transition-all"
+                      className="bg-white/5 text-white text-[10px] uppercase font-black tracking-widest px-4 py-2 rounded-lg hover:bg-white/10 transition-all active:scale-95 border border-white/10"
                     >
-                      Toggle Role
+                      Toggle
                     </button>
                     <button 
                       onClick={() => { if (confirm('Delete user ' + u.email + '?')) deleteUser(u.email); }} 
-                      className="bg-red-500/10 text-red-400 text-xs font-bold px-4 py-2 rounded-full hover:bg-red-500/20 transition-all"
+                      className="bg-red-500/10 text-red-400 text-[10px] uppercase font-black tracking-widest px-4 py-2 rounded-lg hover:bg-red-500/20 transition-all active:scale-95 border border-red-500/10"
                     >
                       Delete
                     </button>
@@ -149,29 +164,37 @@ export default function AdminPage() {
         <section>
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
              <div className="w-2 h-6 bg-lime-400 rounded-full" />
-             Recent Complaints
+             Complaint Management
           </h2>
           <div className="grid grid-cols-1 gap-6">
-            {complaints.map((c) => (
-              <ComplaintCard
-                key={c.id}
-                id={c.id}
-                title={c.title}
-                description={c.description}
-                status={c.status}
-                date={new Date(c.createdAt).toLocaleString()}
-                onResolve={async () => {
-                  try {
-                    const res = await fetch('/api/complaints', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: c.id, status: 'resolved' }) });
-                    if (!res.ok) throw new Error('Failed');
-                    setComplaints((cur) => cur.map((x) => x.id === c.id ? { ...x, status: 'resolved' } : x));
-                    const s = await fetch('/api/admin/stats'); const sd = await s.json(); setStats(sd.stats || null);
-                  } catch (err) {
-                    alert('Error updating status');
-                  }
-                }}
-              />
-            ))}
+            {complaints.length === 0 ? (
+               <div className="p-8 text-center bg-[#111111] border border-white/10 rounded-2xl text-gray-500">No complaints available</div>
+            ) : (
+              complaints.map((c) => (
+                <ComplaintCard
+                  key={c.id}
+                  id={c.id}
+                  title={c.title}
+                  description={c.description}
+                  status={c.status}
+                  userEmail={c.userEmail}
+                  userPhone={c.userPhone}
+                  date={new Date(c.createdAt).toLocaleString()}
+                  isAdmin={true}
+                  onResolve={async () => {
+                    try {
+                      const res = await fetch('/api/complaints', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: c.id, status: 'resolved' }) });
+                      if (!res.ok) throw new Error('Failed');
+                      setComplaints((cur) => cur.map((x) => x.id === c.id ? { ...x, status: 'resolved' } : x));
+                      const s = await fetch('/api/admin/stats'); const sd = await s.json(); setStats(sd.stats || null);
+                    } catch (err) {
+                      alert('Error updating status');
+                    }
+                  }}
+                  onDelete={() => deleteComplaint(c.id)}
+                />
+              ))
+            )}
           </div>
         </section>
       </div>

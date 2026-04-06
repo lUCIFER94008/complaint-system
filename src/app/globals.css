@@ -2,15 +2,15 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0A0A0A; /* deep black background */
+  --bg: #0a0a0a; /* deep black background */
   --surface: #111111; /* soft dark cards */
   --text: #ffffff; /* primary text */
   --muted: #9CA3AF; /* muted text (gray-400/500 family) */
   --muted-2: #6B7280; /* text-gray-500 */
-  --accent-green: #a3e635; /* lime-400 */
+  --accent-green: #84cc16; /* neon green accent */
   --accent-orange: #fb923c; /* orange-400 */
   --accent-blue: #3b82f6; /* blue-500 */
-  --border-rgba: rgba(255,255,255,0.1);
+  --border-rgba: rgba(255,255,255,0.05);
 }
 
 @media (prefers-color-scheme: light) {

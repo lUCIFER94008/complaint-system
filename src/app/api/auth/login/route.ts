@@ -29,7 +29,13 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ email: user.email, role: user.role, name: user.name });
+    return NextResponse.json({ 
+      id: user._id.toString(),
+      email: user.email, 
+      role: user.role, 
+      name: user.name,
+      phone: user.phone
+    });
   } catch (err) {
     console.error('Login error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
