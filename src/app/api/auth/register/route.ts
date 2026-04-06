@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import { User } from '@/models/User';
 import bcrypt from 'bcryptjs';
+import { sendSMS } from '@/lib/sms';
 
 const ADMIN_CREATE_CODE = process.env.ADMIN_CREATE_CODE || 'ADMIN_SECRET';
 
@@ -9,7 +10,7 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
     const body = await req.json();
-    const { name, email, password, role, adminCode } = body || {};
+    const { name, email, password, phone, role, adminCode } = body || {};
 
     if (!email || !password || !name) {
       return NextResponse.json({ error: 'Name, email and password required' }, { status: 400 });
@@ -31,9 +32,21 @@ export async function POST(req: Request) {
       email: String(email).toLowerCase(),
       password: hashedPassword,
       role: role === 'admin' ? 'admin' : 'user',
+      phone: String(phone || ""),
     });
 
     await newUser.save();
+
+    // Send OTP if phone is provided
+    if (phone) {
+      const otp = Math.floor(100000 + Math.random() * 900000);
+      try {
+        await sendSMS(phone, `Your OTP is ${otp}`);
+      } catch (smsErr) {
+        console.error('Failed to send registration OTP:', smsErr);
+        // We don't fail the registration if SMS fails, but we log it.
+      }
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import { Complaint } from "@/models/Complaint";
+import { sendSMS } from "@/lib/sms";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -12,6 +13,19 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const updated = await Complaint.findByIdAndUpdate(id, { status }, { new: true });
     
     if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    // Send SMS notification if status is resolved and phone is available
+    if (status === 'resolved' && updated.phone) {
+      try {
+        await sendSMS(
+          updated.phone,
+          `Your complaint "${updated.title}" is RESOLVED ✅`
+        );
+      } catch (smsErr) {
+        console.error('Failed to send resolution SMS:', smsErr);
+      }
+    }
+
     return NextResponse.json({ ok: true, complaint: updated });
   } catch (err) {
     console.error('Complaint PATCH error:', err);
