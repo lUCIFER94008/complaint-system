@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import { OTP } from "@/models/OTP";
-import { sendSMS } from "@/lib/sms";
+import { sendEmail } from "@/lib/mailer";
 
 export async function POST(req: Request) {
   try {
-    const { phone } = await req.json();
+    const { email } = await req.json();
 
-    if (!phone) {
-      return NextResponse.json({ error: "Phone number is required." }, { status: 400 });
+    if (!email) {
+      return NextResponse.json({ error: "Email is required." }, { status: 400 });
     }
 
-    // Basic phone validation (you can improve this with a library like libphonenumber-js)
-    if (!phone.startsWith("+") || phone.length < 10) {
-      return NextResponse.json({ error: "Invalid phone number format. Use international format (e.g., +91XXXXXXXXXX)." }, { status: 400 });
+    if (!email.includes("@")) {
+      return NextResponse.json({ error: "Invalid email format." }, { status: 400 });
     }
 
     await dbConnect();
@@ -24,24 +23,27 @@ export async function POST(req: Request) {
     // Expiration: 5 minutes from now
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-    // Save or update OTP for this phone
-    // We update if it already exists to avoid multiple active OTPs for the same phone
+    // Save or update OTP for this email
     await OTP.findOneAndUpdate(
-      { phone },
+      { email: email.toLowerCase().trim() },
       { otp: otpCode, expiresAt },
       { upsert: true, new: true }
     );
 
-    // Send SMS via Twilio
+    // Send Email
     try {
-      await sendSMS(phone, `Your verification code is: ${otpCode}. Valid for 5 minutes.`);
-      console.log(`OTP [${otpCode}] sent to [${phone}]`);
-    } catch (smsErr) {
-      console.error("Twilio SMS send error:", smsErr);
-      return NextResponse.json({ error: "Failed to send SMS. Please check your phone number or try again later." }, { status: 500 });
+      await sendEmail(
+        email,
+        "Your Verification Code",
+        `Your verification code is: ${otpCode}. It is valid for 5 minutes.`
+      );
+      console.log(`OTP [${otpCode}] sent to email [${email}]`);
+    } catch (mailErr) {
+      console.error("Email send error:", mailErr);
+      return NextResponse.json({ error: "Failed to send OTP email. Please try again later." }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true, message: "OTP sent successfully." });
+    return NextResponse.json({ ok: true, message: "OTP sent successfully to your email." });
   } catch (err) {
     console.error("Send-OTP error:", err);
     return NextResponse.json({ error: "Internal server error." }, { status: 500 });

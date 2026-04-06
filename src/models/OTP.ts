@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IOTP extends Document {
-  phone: string;
+  email: string;
   otp: string;
   expiresAt: Date;
   createdAt: Date;
@@ -10,7 +10,7 @@ export interface IOTP extends Document {
 
 const OTPSchema: Schema = new Schema(
   {
-    phone: { type: String, required: true },
+    email: { type: String, required: true },
     otp: { type: String, required: true },
     expiresAt: { 
       type: Date, 

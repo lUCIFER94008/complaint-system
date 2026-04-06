@@ -21,19 +21,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid admin code.' }, { status: 403 });
     }
 
-    const exists = await User.findOne({ email: String(email).toLowerCase() });
+    const exists = await User.findOne({ email: String(email).toLowerCase().trim() });
     if (exists) {
       return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
     }
 
-    // --- OTP VERIFICATION ---
-    const otpRecord = await OTP.findOne({ phone, otp });
+    // --- OTP VERIFICATION (VIA EMAIL) ---
+    const otpRecord = await OTP.findOne({ 
+      email: String(email).toLowerCase().trim(), 
+      otp: String(otp) 
+    });
 
     if (!otpRecord) {
-      return NextResponse.json({ error: 'Invalid OTP or phone number' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid OTP or email address' }, { status: 400 });
     }
 
-    // Check if expired (though TTL index handles this, we do a manual check for safety)
+    // Check if expired
     if (new Date() > otpRecord.expiresAt) {
       await OTP.deleteOne({ _id: otpRecord._id });
       return NextResponse.json({ error: 'OTP has expired' }, { status: 400 });
@@ -44,7 +47,7 @@ export async function POST(req: Request) {
 
     const newUser = new User({
       name: String(name),
-      email: String(email).toLowerCase(),
+      email: String(email).toLowerCase().trim(),
       password: hashedPassword,
       role: role === 'admin' ? 'admin' : 'user',
       phone: String(phone || ""),
@@ -53,7 +56,7 @@ export async function POST(req: Request) {
     await newUser.save();
 
     // Delete OTP after successful use
-    await OTP.deleteMany({ phone });
+    await OTP.deleteMany({ email: String(email).toLowerCase().trim() });
 
     return NextResponse.json({ ok: true });
   } catch (err) {

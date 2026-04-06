@@ -38,15 +38,18 @@ export default function RegisterPage() {
     return () => clearInterval(interval);
   }, [step, timer]);
 
-  // 📩 SEND OTP
+  // 📩 SEND OTP (VIA EMAIL)
   async function sendOTP() {
     setError(null);
     setLoading(true);
     try {
+      if (!email.includes("@")) {
+        throw new Error("Please enter a valid email address.");
+      }
       const res = await fetch("/api/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await res.json();
@@ -55,7 +58,7 @@ export default function RegisterPage() {
       setStep("otp");
       setTimer(30);
       setCanResend(false);
-      setMessage("OTP sent to your phone 📱");
+      setMessage(`OTP sent to ${email} 📧`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send OTP");
     } finally {
@@ -72,7 +75,7 @@ export default function RegisterPage() {
 
     const fullOtp = otpValue.join("");
     if (fullOtp.length < 6) {
-      setError("Please enter the full 6-digit OTP.");
+      setError("Please enter the 6-digit code.");
       setLoading(false);
       return;
     }
@@ -95,7 +98,7 @@ export default function RegisterPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      setMessage("Registration successful 🎉 Redirecting...");
+      setMessage("Account verified! 🎉 Redirecting to login...");
       setTimeout(() => router.push("/login"), 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed.");
@@ -105,12 +108,11 @@ export default function RegisterPage() {
   }
 
   const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) return; // Prevent multi-char
+    if (value.length > 1) return;
     const newOtp = [...otpValue];
     newOtp[index] = value;
     setOtpValue(newOtp);
 
-    // Auto-focus next
     if (value && index < 5) {
       otpInputs.current[index + 1]?.focus();
     }
@@ -125,18 +127,17 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-4 py-12">
       <div className="w-full max-w-md bg-[#111111] border border-white/10 rounded-[2rem] p-8 md:p-10 shadow-2xl relative overflow-hidden group">
-        {/* Accent Glow */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-lime-400/10 blur-[100px] rounded-full group-hover:bg-lime-400/20 transition-all duration-700" />
         
         <div className="relative z-10">
-          <header className="mb-10">
+          <header className="mb-10 text-center">
             <h1 className="text-3xl font-black text-white tracking-tight">
-              {step === "form" ? "Get Started" : "Verify Phone"}
+              {step === "form" ? "Register" : "Verify Email"}
             </h1>
             <p className="text-gray-500 mt-2 text-sm font-medium">
               {step === "form" 
-                ? "Join our professional complaint network." 
-                : `We sent a code to ${phone}`}
+                ? "Join our professional portal." 
+                : `We sent a code to ${email}`}
             </p>
           </header>
 
@@ -145,15 +146,15 @@ export default function RegisterPage() {
               <div className="space-y-4">
                 <div>
                   <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Full Name</label>
-                  <input required placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
+                  <input required placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Email</label>
-                  <input required type="email" placeholder="john@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
+                  <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Email Address</label>
+                  <input required type="email" placeholder="email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Phone (+91 format)</label>
-                  <input required placeholder="+91 1234567890" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
+                  <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Phone (for SMS updates)</label>
+                  <input required placeholder="+91 XXXXX XXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
                 </div>
                 <div>
                   <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Password</label>
@@ -170,13 +171,13 @@ export default function RegisterPage() {
                 {role === "admin" && (
                   <div>
                     <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Admin Access Code</label>
-                    <input type="password" required placeholder="Enter secret code" value={adminCode} onChange={(e) => setAdminCode(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
+                    <input type="password" required placeholder="Secret Code" value={adminCode} onChange={(e) => setAdminCode(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
                   </div>
                 )}
               </div>
 
               <button type="submit" disabled={loading} className="w-full bg-lime-400 text-black font-black py-4 rounded-full hover:bg-lime-300 disabled:opacity-50 transition-all active:scale-95 shadow-[0_0_20px_rgba(163,230,53,0.3)] hover:shadow-[0_0_30px_rgba(163,230,53,0.4)] mt-4">
-                {loading ? "Requesting OTP..." : "Send OTP"}
+                {loading ? "SENDING..." : "SEND OTP TO EMAIL"}
               </button>
             </form>
           ) : (
@@ -207,7 +208,7 @@ export default function RegisterPage() {
               </div>
 
               <button onClick={onSubmit} disabled={loading} className="w-full bg-lime-400 text-black font-black py-4 rounded-full hover:bg-lime-300 disabled:opacity-50 transition-all active:scale-95 shadow-[0_0_20px_rgba(163,230,53,0.3)] hover:shadow-[0_0_30px_rgba(163,230,53,0.4)]">
-                {loading ? "Authenticating..." : "Verify & Register"}
+                {loading ? "VERIFYING..." : "VERIFY & REGISTER"}
               </button>
 
               <button onClick={() => setStep("form")} className="block w-full text-center text-gray-600 text-[10px] uppercase font-black tracking-widest hover:text-white transition-colors">Edit contact details</button>
