@@ -52,39 +52,48 @@ export default function ComplaintCard({
           {description}
         </p>
 
-        <div className="pt-4 border-t border-white/5 space-y-2">
+        <div className="pt-4 border-t border-white/5 space-y-3">
           {userEmail && (
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <span className="text-base">📧</span>
-              <span className="hover:text-lime-400 transition-colors uppercase font-bold tracking-tighter">{userEmail}</span>
+            <div className="flex flex-col gap-1">
+              <span className="text-[9px] uppercase font-black tracking-widest text-gray-600">User Email</span>
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                <span className="text-base opacity-70">📧</span>
+                <span className="hover:text-lime-400 transition-colors font-bold tracking-tight">{userEmail}</span>
+              </div>
             </div>
           )}
           {userPhone && (
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <span className="text-base">📱</span>
-              <span className="hover:text-lime-400 transition-colors font-bold tracking-tighter">{userPhone}</span>
+            <div className="flex flex-col gap-1">
+              <span className="text-[9px] uppercase font-black tracking-widest text-gray-600">User Phone</span>
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                <span className="text-base opacity-70">📱</span>
+                <span className="hover:text-lime-400 transition-colors font-bold tracking-tight">{userPhone}</span>
+              </div>
             </div>
           )}
         </div>
 
         {isAdmin && (
-          <div className="flex items-center gap-2 pt-2">
-            {status !== 'resolved' && onResolve && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onResolve(); }}
-                className="flex-1 bg-lime-400 text-black text-[10px] font-black uppercase tracking-widest py-2 rounded-lg hover:bg-lime-300 transition-all active:scale-95"
-              >
-                Resolve
-              </button>
-            )}
-            {onDelete && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                className="flex-1 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest py-2 rounded-lg hover:bg-red-500/20 transition-all active:scale-95"
-              >
-                Delete
-              </button>
-            )}
+          <div className="flex flex-col gap-2 pt-4">
+            <span className="text-[9px] uppercase font-black tracking-widest text-lime-400/50 mb-1">Admin Actions</span>
+            <div className="flex items-center gap-2">
+              {status !== 'resolved' && onResolve && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onResolve(); }}
+                  className="flex-1 bg-lime-400 text-black text-[10px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-lime-300 transition-all active:scale-95 shadow-[0_0_15px_rgba(163,230,53,0.2)]"
+                >
+                  Mark as Resolved
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                  className="flex-1 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-red-500/20 transition-all active:scale-95"
+                >
+                  Delete Record
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>

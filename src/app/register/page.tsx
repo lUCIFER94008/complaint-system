@@ -153,16 +153,16 @@ export default function RegisterPage() {
                   <input required type="email" placeholder="email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Phone (for SMS updates)</label>
-                  <input required placeholder="+91 XXXXX XXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
+                  <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Phone Number (+91 format)</label>
+                  <input required placeholder="+91XXXXXXXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
                 </div>
                 <div>
                   <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Password</label>
                   <input required type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
                 </div>
                 <div>
-                  <label htmlFor="role-select" className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Account Role</label>
-                  <select id="role-select" value={role} onChange={(e) => setRole(e.target.value as any)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none appearance-none">
+                  <label htmlFor="role-select" className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Account Type</label>
+                  <select id="role-select" value={role} onChange={(e) => setRole(e.target.value as any)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none appearance-none font-bold">
                     <option value="user" className="bg-[#111]">Regular User</option>
                     <option value="admin" className="bg-[#111]">Administrator</option>
                   </select>
