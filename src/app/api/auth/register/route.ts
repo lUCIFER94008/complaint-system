@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import { User } from '@/models/User';
+import { OTP } from '@/models/OTP';
 import bcrypt from 'bcryptjs';
 import { sendSMS } from '@/lib/sms';
 
@@ -10,10 +11,10 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
     const body = await req.json();
-    const { name, email, password, phone, role, adminCode } = body || {};
+    const { name, email, password, phone, role, adminCode, otp } = body || {};
 
-    if (!email || !password || !name) {
-      return NextResponse.json({ error: 'Name, email and password required' }, { status: 400 });
+    if (!email || !password || !name || !phone || !otp) {
+      return NextResponse.json({ error: 'Name, email, password, phone and OTP are required' }, { status: 400 });
     }
 
     if (role === 'admin' && adminCode !== ADMIN_CREATE_CODE) {
@@ -24,6 +25,20 @@ export async function POST(req: Request) {
     if (exists) {
       return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
     }
+
+    // --- OTP VERIFICATION ---
+    const otpRecord = await OTP.findOne({ phone, otp });
+
+    if (!otpRecord) {
+      return NextResponse.json({ error: 'Invalid OTP or phone number' }, { status: 400 });
+    }
+
+    // Check if expired (though TTL index handles this, we do a manual check for safety)
+    if (new Date() > otpRecord.expiresAt) {
+      await OTP.deleteOne({ _id: otpRecord._id });
+      return NextResponse.json({ error: 'OTP has expired' }, { status: 400 });
+    }
+    // ------------------------
 
     const hashedPassword = await bcrypt.hash(String(password), 10);
 
@@ -37,16 +52,8 @@ export async function POST(req: Request) {
 
     await newUser.save();
 
-    // Send OTP if phone is provided
-    if (phone) {
-      const otp = Math.floor(100000 + Math.random() * 900000);
-      try {
-        await sendSMS(phone, `Your OTP is ${otp}`);
-      } catch (smsErr) {
-        console.error('Failed to send registration OTP:', smsErr);
-        // We don't fail the registration if SMS fails, but we log it.
-      }
-    }
+    // Delete OTP after successful use
+    await OTP.deleteMany({ phone });
 
     return NextResponse.json({ ok: true });
   } catch (err) {

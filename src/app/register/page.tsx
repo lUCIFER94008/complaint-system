@@ -4,19 +4,49 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 
 export default function RegisterPage() {
+  const [step, setStep] = useState<"form" | "otp">("form");
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+
   const [role, setRole] = useState<"user" | "admin">("user");
   const [adminCode, setAdminCode] = useState("");
+
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // 📩 SEND OTP
+  async function sendOTP() {
+    setError(null);
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/send-otp", {
+        method: "POST",
+        body: JSON.stringify({ phone }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      setStep("otp");
+      setMessage("OTP sent to your phone 📱");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send OTP");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // 🔐 VERIFY OTP + REGISTER
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setMessage(null);
     setError(null);
+    setMessage(null);
     setLoading(true);
 
     try {
@@ -26,26 +56,24 @@ export default function RegisterPage() {
         body: JSON.stringify({
           name,
           email,
+          phone,
           password,
+          otp,
           role,
           adminCode: role === "admin" ? adminCode : undefined,
         }),
       });
 
-      let data: any = null;
-      try {
-        data = await res.json();
-      } catch {
-        data = null;
-      }
-      if (!res.ok) throw new Error(data?.error ?? "Registration failed");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
 
-      setMessage("Registration successful. You can login now.");
+      setMessage("Registration successful 🎉");
+      setStep("form");
       setName("");
       setEmail("");
+      setPhone("");
       setPassword("");
-      setAdminCode("");
-      setRole("user");
+      setOtp("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -56,52 +84,126 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]">
       <main className="w-full max-w-lg card-surface p-8 shadow-lg">
-        <h1 className="text-2xl font-semibold text-white">Create account</h1>
-        <p className="mt-1 text-sm text-muted">Register to submit and track complaints</p>
+        <h1 className="text-2xl font-semibold text-white">
+          {step === "form" ? "Create account" : "Verify OTP"}
+        </h1>
 
-        <form onSubmit={onSubmit} className="mt-6 space-y-4">
-          <div>
-            <label htmlFor="name" className="text-sm text-[var(--muted)]">Full name</label>
-            <input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your full name" className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-[var(--text)] outline-none focus:ring-2 focus:ring-[var(--accent)]" />
-          </div>
+        <p className="mt-1 text-sm text-muted">
+          {step === "form"
+            ? "Register to submit and track complaints"
+            : "Enter the OTP sent to your phone"}
+        </p>
 
-          <div>
-            <label htmlFor="email" className="text-sm text-[var(--muted)]">Email</label>
-            <input id="email" required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@example.com" className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-[var(--text)] outline-none focus:ring-2 focus:ring-[var(--accent)]" />
-          </div>
+        {/* ================= FORM STEP ================= */}
+        {step === "form" && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              sendOTP();
+            }}
+            className="mt-6 space-y-4"
+          >
+            <input
+              placeholder="Full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="input"
+            />
 
-          <div>
-            <label htmlFor="password" className="text-sm text-[var(--muted)]">Password</label>
-            <input id="password" required type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-[var(--text)] outline-none focus:ring-2 focus:ring-[var(--accent)]" />
-          </div>
+            <input
+              type="email"
+              required
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="input"
+            />
 
-          <div>
-            <label htmlFor="role" className="text-sm text-[var(--muted)]">Role</label>
-            <select id="role" value={role} onChange={(e) => setRole(e.target.value as any)} className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-[var(--text)] outline-none focus:ring-2 focus:ring-[var(--accent)]">
+            {/* 📱 PHONE INPUT */}
+            <input
+              type="text"
+              required
+              placeholder="+91XXXXXXXXXX"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="input"
+            />
+
+            <input
+              type="password"
+              required
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="input"
+            />
+
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value as any)}
+              className="input"
+            >
               <option value="user">User</option>
               <option value="admin">Admin</option>
             </select>
-          </div>
 
-          {role === "admin" ? (
-            <div>
-              <label htmlFor="adminCode" className="text-sm text-[var(--muted)]">Admin code</label>
-              <input id="adminCode" value={adminCode} onChange={(e) => setAdminCode(e.target.value)} type="password" placeholder="Admin secret code" className="mt-2 w-full rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-[var(--text)] outline-none focus:ring-2 focus:ring-[var(--accent)]" />
-              {process.env.NODE_ENV !== 'production' ? (
-                <p className="mt-2 text-xs text-zinc-400">Development: default admin code is <strong>ADMIN_SECRET</strong></p>
-              ) : null}
-            </div>
-          ) : null}
+            {role === "admin" && (
+              <input
+                type="password"
+                placeholder="Admin code"
+                value={adminCode}
+                onChange={(e) => setAdminCode(e.target.value)}
+                className="input"
+              />
+            )}
 
-          {message ? <div className="text-sm text-emerald-400">{message}</div> : null}
-          {error ? <div className="text-sm text-red-400">{error}</div> : null}
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full py-2 rounded-full"
+            >
+              {loading ? "Sending OTP..." : "Send OTP"}
+            </button>
+          </form>
+        )}
 
-          <button disabled={loading} type="submit" className="w-full rounded-full btn-primary px-4 py-2 text-sm font-semibold disabled:opacity-60">
-            {loading ? "Registering..." : "Create account"}
-          </button>
-        </form>
+        {/* ================= OTP STEP ================= */}
+        {step === "otp" && (
+          <form onSubmit={onSubmit} className="mt-6 space-y-4">
+            <input
+              type="text"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="input text-center tracking-widest text-lg"
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full py-2 rounded-full"
+            >
+              {loading ? "Verifying..." : "Verify & Register"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setStep("form")}
+              className="text-sm text-gray-400 underline"
+            >
+              Change phone number
+            </button>
+          </form>
+        )}
+
+        {/* ================= MESSAGES ================= */}
+        {message && (
+          <div className="mt-4 text-sm text-green-400">{message}</div>
+        )}
+        {error && (
+          <div className="mt-4 text-sm text-red-400">{error}</div>
+        )}
       </main>
     </div>
   );
 }
-
