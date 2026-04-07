@@ -16,6 +16,24 @@ export async function POST(req: Request) {
        return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
+    if (name.trim().length < 3) {
+      return NextResponse.json({ error: "Full Name must be at least 3 characters" }, { status: 400 });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+    }
+
+    const phoneRegex = /^\+91\d{10}$/;
+    if (!phoneRegex.test(phone)) {
+      return NextResponse.json({ error: "Invalid phone number format. Use +91XXXXXXXXXX" }, { status: 400 });
+    }
+
+    if (password.length < 6) {
+      return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
+    }
+
     if (role === 'admin' && adminCode !== ADMIN_CREATE_CODE) {
       return NextResponse.json({ error: 'Invalid admin code.' }, { status: 403 });
     }

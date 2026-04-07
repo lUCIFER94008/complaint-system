@@ -41,11 +41,30 @@ export default function RegisterPage() {
   // 📩 SEND OTP (VIA EMAIL)
   async function sendOTP() {
     setError(null);
+    setMessage(null);
+
+    // Frontend Validation
+    if (name.trim().length < 3) {
+      setError("Full Name must be at least 3 characters");
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+    const phoneRegex = /^\+91\d{10}$/;
+    if (!phoneRegex.test(phone)) {
+      setError("Invalid phone number format. Use +91XXXXXXXXXX");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
     setLoading(true);
     try {
-      if (!email.includes("@")) {
-        throw new Error("Please enter a valid email address.");
-      }
       const res = await fetch("/api/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -58,7 +77,7 @@ export default function RegisterPage() {
       setStep("otp");
       setTimer(30);
       setCanResend(false);
-      setMessage(`OTP sent to ${email} 📧`);
+      setMessage("OTP sent successfully! 📧");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send OTP");
     } finally {
@@ -146,19 +165,20 @@ export default function RegisterPage() {
               <div className="space-y-4">
                 <div>
                   <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Full Name</label>
-                  <input required placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
+                  <input required placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-500 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
                 </div>
                 <div>
                   <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Email Address</label>
-                  <input required type="email" placeholder="email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
+                  <input required type="email" placeholder="email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-500 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Phone Number (+91 format)</label>
-                  <input required placeholder="+91XXXXXXXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
+                  <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Phone Number</label>
+                  <input required placeholder="+91XXXXXXXXXX" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-500 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
+                  <p className="text-[9px] text-gray-500 mt-1.5 ml-1 font-medium">Format: +91 followed by 10 digits</p>
                 </div>
                 <div>
                   <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Password</label>
-                  <input required type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-700 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
+                  <input required type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-500 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
                 </div>
                 <div>
                   <label htmlFor="role-select" className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Account Type</label>
@@ -171,13 +191,13 @@ export default function RegisterPage() {
                 {role === "admin" && (
                   <div>
                     <label className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1.5 block ml-1">Admin Access Code</label>
-                    <input type="password" required placeholder="Secret Code" value={adminCode} onChange={(e) => setAdminCode(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
+                    <input type="password" required placeholder="Secret Code" value={adminCode} onChange={(e) => setAdminCode(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder:text-gray-500 focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all outline-none" />
                   </div>
                 )}
               </div>
 
-              <button type="submit" disabled={loading} className="w-full bg-lime-400 text-black font-black py-4 rounded-full hover:bg-lime-300 disabled:opacity-50 transition-all active:scale-95 shadow-[0_0_20px_rgba(163,230,53,0.3)] hover:shadow-[0_0_30px_rgba(163,230,53,0.4)] mt-4">
-                {loading ? "SENDING..." : "SEND OTP TO EMAIL"}
+              <button type="submit" disabled={loading} className="w-full bg-lime-400 text-black font-black py-4 rounded-full hover:bg-lime-300 disabled:opacity-50 transition-all active:scale-95 shadow-[0_0_20px_rgba(163,230,53,0.3)] hover:shadow-[0_0_30px_rgba(163,230,53,0.4)] mt-4 uppercase tracking-widest text-xs">
+                {loading ? "Sending..." : "Send OTP to Email"}
               </button>
             </form>
           ) : (
@@ -217,8 +237,15 @@ export default function RegisterPage() {
 
           {/* Feedback */}
           {(message || error) && (
-            <div className={`mt-8 p-4 rounded-2xl text-xs font-bold ${error ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-lime-400/10 text-lime-400 border border-lime-400/20'}`}>
-              {error || message}
+            <div className={`mt-8 p-4 rounded-lg text-xs font-bold transition-all animate-in fade-in slide-in-from-top-2 ${error ? 'bg-red-900/20 text-red-400 border border-red-500/10' : 'bg-lime-400/10 text-lime-400 border border-lime-400/20'}`}>
+              <div className="flex items-center gap-2">
+                {error ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                )}
+                {error || message}
+              </div>
             </div>
           )}
 

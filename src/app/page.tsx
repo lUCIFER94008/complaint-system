@@ -103,17 +103,34 @@ export default function Home() {
       </main>
 
       <footer className="mx-auto max-w-7xl px-4 md:px-8 lg:px-12 py-12 border-t border-white/5">
-         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
-               <div className="w-6 h-6 bg-lime-400 rounded-md flex items-center justify-center">
-                  <div className="w-3 h-3 bg-black rounded-sm rotate-45" />
+         <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-8">
+            {/* LEFT: LOGO */}
+            <div className="flex items-center justify-center md:justify-start gap-2.5">
+               <div className="w-8 h-8 bg-lime-400 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(163,230,53,0.3)]">
+                  <div className="w-4 h-4 bg-black rounded-sm rotate-45" />
                </div>
-               <span className="font-bold text-white">Complaint System</span>
+               <span className="font-black text-xl text-white tracking-tighter">Complaint System</span>
             </div>
-            <p className="text-sm text-gray-500">© 2026 SaaS Solutions Inc. All rights reserved.</p>
-            <div className="flex gap-8">
-               <Link href="#" className="text-sm text-gray-500 hover:text-white transition">Privacy</Link>
-               <Link href="#" className="text-sm text-gray-500 hover:text-white transition">Terms</Link>
+
+            {/* CENTER: COPYRIGHT */}
+            <div className="text-center">
+               <p className="text-sm text-gray-500 font-medium">
+                  © 2026 Designed by{" "}
+                  <a 
+                    href="https://r7-olive.vercel.app/" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-lime-400 hover:text-white transition-colors font-bold"
+                  >
+                    R7
+                  </a>
+               </p>
+            </div>
+
+            {/* RIGHT: LINKS */}
+            <div className="flex items-center justify-center md:justify-end gap-10">
+               <Link href="#" className="text-sm text-gray-500 hover:text-white transition-all font-bold uppercase tracking-widest text-[10px]">Privacy</Link>
+               <Link href="#" className="text-sm text-gray-500 hover:text-white transition-all font-bold uppercase tracking-widest text-[10px]">Terms</Link>
             </div>
          </div>
       </footer>
