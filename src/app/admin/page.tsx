@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ComplaintCard from "@/components/ComplaintCard";
+import { toast } from "react-hot-toast";
 
 type Complaint = {
   id: string;
@@ -25,9 +26,10 @@ export default function AdminPage() {
       const j = await res.json();
       if (!res.ok) throw new Error(j?.error || 'Failed');
       setUsers((cur) => cur.filter((u) => u.email !== email));
+      toast.success("User deleted");
       const s = await fetch('/api/admin/stats'); const sd = await s.json(); setStats(sd.stats || null);
     } catch (err) {
-      alert(err instanceof Error ? err.message : String(err));
+      toast.error(err instanceof Error ? err.message : "Failed to delete user");
     }
   }
 
@@ -40,9 +42,10 @@ export default function AdminPage() {
       const j = await res.json();
       if (!res.ok) throw new Error(j?.error || 'Failed');
       setUsers((cur) => cur.map((x) => x.email === email ? { ...x, role: newRole } : x));
+      toast.success(`Role updated to ${newRole}`);
       const s = await fetch('/api/admin/stats'); const sd = await s.json(); setStats(sd.stats || null);
     } catch (err) {
-      alert(err instanceof Error ? err.message : String(err));
+      toast.error(err instanceof Error ? err.message : "Failed to toggle role");
     }
   }
 
@@ -52,9 +55,10 @@ export default function AdminPage() {
       const res = await fetch(`/api/complaints?id=${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
       setComplaints((cur) => cur.filter((c) => c.id !== id));
+      toast.success("Complaint deleted");
       const s = await fetch('/api/admin/stats'); const sd = await s.json(); setStats(sd.stats || null);
     } catch (err) {
-      alert('Error deleting complaint');
+      toast.error('Error deleting complaint');
     }
   }
 
@@ -186,9 +190,10 @@ export default function AdminPage() {
                       const res = await fetch('/api/complaints', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: c.id, status: 'resolved' }) });
                       if (!res.ok) throw new Error('Failed');
                       setComplaints((cur) => cur.map((x) => x.id === c.id ? { ...x, status: 'resolved' } : x));
+                      toast.success("SMS sent ✅");
                       const s = await fetch('/api/admin/stats'); const sd = await s.json(); setStats(sd.stats || null);
                     } catch (err) {
-                      alert('Error updating status');
+                      toast.error("Failed to send SMS ❌");
                     }
                   }}
                   onDelete={() => deleteComplaint(c.id)}

@@ -35,6 +35,29 @@ export default function ComplaintCard({
 
   const s = statusInfo[status];
 
+  const [isResolving, setIsResolving] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+
+  const handleResolve = async () => {
+    if (!onResolve) return;
+    setIsResolving(true);
+    try {
+      await onResolve();
+    } finally {
+      setIsResolving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!onDelete) return;
+    setIsDeleting(true);
+    try {
+      await onDelete();
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <article className="group bg-[#111111] border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:border-lime-400/50 hover:shadow-[0_0_20px_rgba(163,230,53,0.1)] hover:scale-[1.02]">
       <div className="flex flex-col gap-4">
@@ -79,18 +102,20 @@ export default function ComplaintCard({
             <div className="flex items-center gap-2">
               {status !== 'resolved' && onResolve && (
                 <button
-                  onClick={(e) => { e.stopPropagation(); onResolve(); }}
-                  className="flex-1 bg-lime-400 text-black text-[10px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-lime-300 transition-all active:scale-95 shadow-[0_0_15px_rgba(163,230,53,0.2)]"
+                  onClick={(e) => { e.stopPropagation(); handleResolve(); }}
+                  disabled={isResolving || isDeleting}
+                  className="flex-1 bg-lime-400 text-black text-[10px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-lime-300 transition-all active:scale-95 shadow-[0_0_15px_rgba(163,230,53,0.2)] disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                 >
-                  Mark as Resolved
+                  {isResolving ? "Resolving..." : "Mark as Resolved"}
                 </button>
               )}
               {onDelete && (
                 <button
-                  onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                  className="flex-1 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-red-500/20 transition-all active:scale-95"
+                  onClick={(e) => { e.stopPropagation(); handleDelete(); }}
+                  disabled={isResolving || isDeleting}
+                  className="flex-1 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-red-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
                 >
-                  Delete Record
+                  {isDeleting ? "Deleting..." : "Delete Record"}
                 </button>
               )}
             </div>

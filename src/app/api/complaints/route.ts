@@ -211,7 +211,7 @@ export async function PATCH(req: Request) {
         try {
           await sendSMS(
             phoneTo,
-            `Your complaint "${updated.title || 'Untitled'}" has been resolved ✅`
+            `Your complaint has been resolved`
           );
         } catch (smsErr) {
           console.error("SMS notification failed in PATCH:", smsErr);
